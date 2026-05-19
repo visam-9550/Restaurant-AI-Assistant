@@ -9,11 +9,12 @@ from app.crews.chatCrew import chat_crew
 from app.crew import intent_crew
 import fitz # PyMuPDF for PDF processing
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+from app.db.qdrent import client as qdrant_client
 from app.services.qdrantServices import QdrantService
 from app.services.embeddingService import EmbeddingService
 
 embedding_service = EmbeddingService()
-qdrant_service = QdrantService()
+qdrant_service = QdrantService(qdrant_client)
 
 router = APIRouter()
 load_dotenv()
