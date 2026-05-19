@@ -1,0 +1,10 @@
+# Ignore environment files
+backend/.env
+
+# Ignore Python bytecode and caches
+__pycache__/
+*.py[cod]
+**/__pycache__/
+
+# Ignore local IDE settings
+.vscode/
