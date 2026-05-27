@@ -1,13 +1,8 @@
-from motor.motor_asyncio import (
-    AsyncIOMotorClient
-)
+from pymongo import MongoClient
 
-MONGO_URL = (
-    "mongodb://localhost:27017"
-)
-
-client = AsyncIOMotorClient(
-    MONGO_URL
-)
+client = MongoClient("mongodb://localhost:27017")
 
 db = client["restaurant_ai"]
+
+users_collection = db["users"]
+users_collection.create_index("phone_number", unique=True)
