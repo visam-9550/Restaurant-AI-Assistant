@@ -1,6 +1,8 @@
+import asyncio
 import shutil
 
 from fastapi import APIRouter, File, UploadFile
+from fastapi.encoders import jsonable_encoder
 from dotenv import load_dotenv
 import os
 import json
@@ -8,7 +10,6 @@ from app.crews.chatCrew import chat_crew
 from app.crew import intent_crew, faq_crew, menu_crew, order_crew
 import fitz # PyMuPDF for PDF processing
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from app.db.qdrent import client as qdrant_client
 from app.services.qdrantServices import QdrantService
 from app.services.embeddingService import EmbeddingService
 from qdrant_client.models import PointStruct
@@ -19,9 +20,12 @@ from typing import Optional
 from enum import Enum
 from app.crew import menu_parser_crew
 import re
+from app.flows import RestaurantAssistantFlow, SampleFlow
+from fastapi.concurrency import run_in_threadpool
+
 
 embedding_service = EmbeddingService()
-qdrant_service = QdrantService(qdrant_client)
+qdrant_service = QdrantService()
 
 router = APIRouter()
 load_dotenv()
@@ -216,44 +220,91 @@ class UserMessage(BaseModel):
     user_id: str
     message: str
     session_id: str
+    restaurant_id: str
+
+def sample_execute_flow(query: str):
+    print("Before kickoff")
+    sample_flow = SampleFlow()
+    print("Middle kickoff")
+    # response = await run_in_threadpool(
+    #     sample_flow.kickoff,
+    #     inputs={"query": "What is the weather today?"}
+    # )
+    response =  sample_flow.kickoff(
+        inputs={
+            "query": query
+        }
+    )
+    print("After kickoff")
+    print("Sample Flow response:", response)
+    return {"message": response}
+
+
+def restaurant_execute_flow(message: str, user_id:str, session_id: int, restaurant_id: str):
+    flow = RestaurantAssistantFlow()
+    inputs={
+            "query": message,
+            "user_id": user_id,
+            "session_id": session_id,
+            "restaurant_id": restaurant_id
+    }
+
+    response = flow.kickoff(inputs=inputs)
+    intent = getattr(flow.state, 'intent_name', None)
+    message = getattr(flow.state, 'response', None)
+    print(f"Intent: {intent}, Message: {message}")
+    if hasattr(message, "raw"):
+        message = message.raw
+    if not isinstance(message, (str, dict, list, int, float, bool, type(None))):
+        try:
+            message = jsonable_encoder(message)
+        except Exception:
+            message = str(message)
+    return {
+        "intent": intent,
+        "message": message
+    }
+
 
 @router.post("/user/message")
 async def handle_user_message(request: UserMessage):
-    print(f"Received message from user {request.user_id}: {request.message}")
-    response = intent_crew.kickoff({"input": request.message})
-    result_text = str(response.raw) if hasattr(response, 'raw') else str(response)
-    print("Response from chat crew:", result_text)
-    # Extract intent if possible
     try:
-        data = json.loads(result_text)
-        print("Parsed response:", data)
-        intent = data.get("intent", result_text)
-    except Exception as e:
-        print(f"Error occurred while parsing JSON: {e}")
-        intent = result_text
-
-    
-    if(intent == "faq" or intent == "restaurant_policy" or intent == "restaurant_timings" or intent == "payment_issue" or intent == "delivery_enquiry" or intent == "complaint" or intent == "parking_enquiry"):
-        faq_response = faq_crew.kickoff({"input": request.message})
-        faq_result_text = str(faq_response.raw) if hasattr(faq_response, 'raw') else str(faq_response)
-        print("Response from FAQ crew:", faq_result_text)
-        return {"message": faq_result_text, "intent": intent}
-    
-    if intent in ["menu_search", "menu_price_query", "menu_availability_query", "menu_recommendation", "food_recommendation"]:
-        menu_response = menu_crew.kickoff(
-        inputs={
-            "message": request.message,
-            "user_id": request.user_id
-            }
+        print(
+            f"Received message from user "
+            f"{request.user_id}: {request.message}"
         )
-        print("Response from Menu Search Tool:", menu_response)
-        return {"message": menu_response, "intent": intent}
-    if intent == "order_food":
-        order_response = order_crew.kickoff({"input": request.message})
-        order_result_text = str(order_response.raw) if hasattr(order_response, 'raw') else str(order_response)
-        print("Response from Order crew:", order_result_text)
-        return {"message": order_result_text, "intent": intent}
-    return {"message": intent}
+        response = await run_in_threadpool(
+            restaurant_execute_flow,
+            request.message,
+            request.user_id,
+            request.session_id,
+            request.restaurant_id
+        )
+
+        print("Flow response:", response)
+
+        # Ensure intent_name and response are serializable
+        print(f"Intent: {response['intent']}, Message: {response['message']}")
+
+        # # Defensive: convert to string if not serializable
+        # if not isinstance(response["intent"], (str, type(None))):
+        #     response["intent"] = str(response["intent"])
+        # if not isinstance(response['message'], (str, type(None))):
+        #     response["message"] = str(response['message'])
+
+        return {
+            "intent": response["intent"],
+            "message": response['message']
+        }
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print("FLOW ERROR:", str(e))
+        print("TRACEBACK:\n", error_details)
+        return {
+            "error": str(e),
+            "traceback": error_details
+        }
 
 class dietType(str, Enum):
     veg = "veg"

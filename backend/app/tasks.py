@@ -454,6 +454,7 @@ order_task = Task(
 
     - ordered food items
     - quantities
+    - price for one quantity
 
     ------------------------------------------------
 
@@ -480,7 +481,8 @@ order_task = Task(
     [
         {
             "food_item_name": "Chicken Biryani",
-            "quantity": 1
+            "quantity": 1,
+            "price": 289
         }
     ]
 
@@ -493,11 +495,13 @@ order_task = Task(
     [
         {
             "food_item_name": "Chicken Biryani",
-            "quantity": 2
+            "quantity": 2,
+            "price": 289
         },
         {
             "food_item_name": "Coke",
-            "quantity": 1
+            "quantity": 1,
+            "price": 45
         }
     ]
 
@@ -510,7 +514,8 @@ order_task = Task(
     [
         {
             "food_item_name": "Pizza",
-            "quantity": 3
+            "quantity": 3,
+            "price": 499
         }
     ]
 
@@ -537,7 +542,8 @@ order_task = Task(
     [
         {
             "food_item_name": "Chicken Biryani",
-            "quantity": 2
+            "quantity": 2,
+            "price": 289
         }
     ]
 
@@ -552,12 +558,110 @@ order_task = Task(
 [
     {
         "food_item_name": "Chicken Biryani",
-        "quantity": 2
+        "quantity": 2,
+        "price": 289
     },
     {
         "food_item_name": "Coke",
-        "quantity": 1
+        "quantity": 1,
+        "price": 45
     }
 ]
 """
 )
+
+
+
+# order_task = Task(
+# name="Menu Validation Task",
+
+# agent=order_agent,
+
+# description="""
+# Validate the following extracted order items.
+
+# ORDER ITEMS:
+
+# {order_items}
+
+# ------------------------------------------------
+
+# Validation Rules
+
+# Exact Match:
+
+# - item_confirmed=true
+# - availability_status=available
+
+# Similar Match:
+
+# - closest menu item found
+# - item_confirmed=false
+# - availability_status=similar_item_found
+
+# Multiple Matches:
+
+# Example:
+# User requested: Dosa
+
+# Menu:
+# - Plain Dosa
+# - Masala Dosa
+# - Ghee Karam Dosa
+
+# Output:
+
+# - item_confirmed=false
+# - availability_status=multiple_matches_found
+# - return suggested_items
+
+# Not Available:
+
+# - item_confirmed=false
+# - availability_status=not_available
+
+# ------------------------------------------------
+
+# Required Output
+
+# [
+#     {
+#         "food_item_name": "",
+#         "matched_item": null,
+#         "quantity": 1,
+#         "price": null,
+#         "item_confirmed": false,
+#         "availability_status": "",
+#         "suggested_items": []
+#     }
+# ]
+
+# ------------------------------------------------
+
+# Rules
+
+# - JSON array only
+# - No markdown
+# - No explanations
+# - No comments
+# - No extra text
+# - Output must start with [
+# - Output must end with ]
+# """,
+
+# expected_output="""
+# ```
+
+# [
+# {
+# "food_item_name": "Chicken Biryani",
+# "matched_item": "Chicken Biryani",
+# "quantity": 2,
+# "price": 289,
+# "item_confirmed": true,
+# "availability_status": "available",
+# "suggested_items": []
+# }
+# ]
+# """
+# )

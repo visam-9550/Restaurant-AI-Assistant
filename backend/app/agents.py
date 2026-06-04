@@ -7,8 +7,8 @@ from app.tools.menu import menu_search_tool, user_preferences_search_tool
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 llm = LLM(
-    model="gpt-4o",
-    temperature=0.3,
+    model="gpt-4o-mini",
+    temperature=0.1,
     max_tokens=5048,
     api_key=openai_api_key,
 )
@@ -59,7 +59,6 @@ menu_parser_agent = Agent(
     cache=False,
     verbose=False
 )
-
 
 
 intent_agent = Agent(
@@ -357,8 +356,54 @@ order_agent = Agent(
     llm=llm,
     cache=False,
     verbose=False,
-
+    tools=[menu_search_tool],
     max_iter=3
 )
 
+# order_agent = Agent(
+# role="Restaurant Menu Validation Specialist",
+
+# goal="""
+# Validate requested food items against
+# restaurant menu data and return JSON only.
+# """,
+
+# backstory="""
+# Always use menu_search_tool.
+
+# Responsibilities:
+
+# - validate menu items
+# - find exact matches
+# - find similar matches
+# - detect ambiguous matches
+# - identify unavailable items
+# - return menu prices
+
+# Status Values:
+
+# available
+# similar_item_found
+# multiple_matches_found
+# not_available
+
+# Rules:
+
+# - Use menu prices only
+# - Never invent menu items
+# - Never invent prices
+# - Return JSON only
+# """,
+
+# tools=[menu_search_tool],
+
+# llm=llm,
+
+# cache=False,
+
+# verbose=False,
+
+# max_iter=2
+
+# )
 
