@@ -1,5 +1,5 @@
 from crewai import Task
-from app.agents import chat_agent, intent_agent, faq_agent, menu_agent, order_agent, menu_parser_agent
+from app.agents import chat_agent, intent_agent, faq_agent, menu_agent, order_agent, menu_parser_agent, greeting_agent
 
 chat_task = Task(
     agent=chat_agent,
@@ -264,404 +264,1341 @@ faq_task = Task(
     agent=faq_agent
 )
 
+# menu_task = Task(
+
+#     name="Personalized Restaurant Menu and Food Recommendation Task",
+
+#     agent=menu_agent,
+
+#     description="""
+#     Analyze the customer restaurant query
+#     and intelligently retrieve:
+
+#     - restaurant menu information
+#     - customer food preferences
+
+#     using the available tools.
+
+#     ------------------------------------------------
+
+#     CUSTOMER QUERY:
+#     {message}
+
+#     ------------------------------------------------
+
+#     CUSTOMER USER ID:
+#     {user_id}
+
+#     ------------------------------------------------
+
+#     YOUR RESPONSIBILITIES:
+
+#     - search restaurant menu data
+#     - retrieve customer food preferences
+#     - provide personalized food recommendations
+#     - show complete menu listings
+#     - recommend suitable dishes
+#     - explain food prices and quantities
+#     - suggest beverages and desserts
+#     - recommend restaurant specials
+#     - improve customer food discovery experience
+
+#     ------------------------------------------------
+
+#     VERY IMPORTANT INSTRUCTIONS:
+
+#     - ALWAYS use the menu search tool
+#     - IF user asks for:
+#         - recommendations
+#         - suggestions
+#         - personalized foods
+#         - what should I eat
+#         - best food for me
+
+#       THEN:
+#       ALWAYS use the
+#       user_preferences_search_tool
+
+#     ------------------------------------------------
+
+#     RECOMMENDATION LOGIC:
+
+#     Use customer preferences such as:
+
+#     - favorite cuisines
+#     - diet type
+#     - favorite foods
+#     - spice level
+#     - favorite beverages
+#     - budget preference
+#     - ordering history
+
+#     to recommend suitable menu items.
+
+#     ------------------------------------------------
+
+#     RESPONSE RULES:
+
+#     IF USER ASKS:
+
+#     - "show full menu"
+#       → show ALL retrieved categories
+
+#     - "recommend food"
+#       → use user preferences +
+#         menu search results
+
+#     - "suggest dinner"
+#       → recommend personalized dinner items
+
+#     - "show veg food"
+#       → recommend vegetarian dishes
+
+#     - "show biryanis"
+#       → show ALL biryani items
+
+#     ------------------------------------------------
+
+#     RESPONSE FORMAT:
+
+#     Recommendation Example:
+
+#     Recommended For You:
+
+#     1. Chicken Dum Biryani
+#        - Quantity: 850 gm
+#        - Price: ₹320
+
+#     Reason:
+#     Based on your preference for
+#     spicy non-veg biryanis.
+
+#     ------------------------------------------------
+
+#     IMPORTANT:
+
+#     - show MULTIPLE menu items
+#     - show COMPLETE category results
+#     - provide personalized suggestions
+#     - keep formatting clean
+#     - keep response readable
+#     - NEVER hallucinate recommendations
+
+#     ------------------------------------------------
+
+#     RESPONSE STYLE:
+
+#     - professional
+#     - personalized
+#     - conversational
+#     - restaurant assistant tone
+#     - customer-friendly
+
+#     ------------------------------------------------
+
+#     EXAMPLE USER QUERIES:
+
+#     "Show full menu"
+
+#     "Recommend food for me"
+
+#     "Suggest dinner"
+
+#     "What should I eat?"
+
+#     "Show all biryanis"
+
+#     "Recommend based on my preferences"
+
+#     ------------------------------------------------
+
+#     FINAL OUTPUT REQUIREMENTS:
+
+#     - conversational response only
+#     - no JSON
+#     - no markdown
+#     - no technical explanations
+#     - no hallucinations
+#     - complete menu visibility
+#     - personalized recommendations
+#     - structured formatting
+#     """,
+
+#     expected_output="""
+#     A complete and personalized
+#     restaurant menu response containing:
+
+#     - menu categories
+#     - food item names
+#     - prices
+#     - quantities
+#     - personalized recommendations
+#     - beverages
+#     - desserts
+#     - restaurant specials
+
+#     using ONLY retrieved menu data
+#     and retrieved customer preferences.
+#     """
+# )
+
+
 menu_task = Task(
+name="Restaurant Menu Search and Recommendation Task",
 
-    name="Personalized Restaurant Menu and Food Recommendation Task",
+agent=menu_agent,
 
-    agent=menu_agent,
+description="""
 
-    description="""
-    Analyze the customer restaurant query
-    and intelligently retrieve:
+CUSTOMER QUERY
 
-    - restaurant menu information
-    - customer food preferences
+{message}
 
-    using the available tools.
+---
 
-    ------------------------------------------------
+USER ID
 
-    CUSTOMER QUERY:
-    {message}
+{user_id}
 
-    ------------------------------------------------
+---
 
-    CUSTOMER USER ID:
-    {user_id}
+CHAT HISTORY
 
-    ------------------------------------------------
+{chat_history}
 
-    YOUR RESPONSIBILITIES:
+---
 
-    - search restaurant menu data
-    - retrieve customer food preferences
-    - provide personalized food recommendations
-    - show complete menu listings
-    - recommend suitable dishes
-    - explain food prices and quantities
-    - suggest beverages and desserts
-    - recommend restaurant specials
-    - improve customer food discovery experience
+TASK
 
-    ------------------------------------------------
+Analyze the user query and determine:
 
-    VERY IMPORTANT INSTRUCTIONS:
+1. Menu Search
+2. Menu Price Query
+3. Food Recommendation
+4. Personalized Recommendation
+5. Follow-up Menu Query
 
-    - ALWAYS use the menu search tool
-    - IF user asks for:
-        - recommendations
-        - suggestions
-        - personalized foods
-        - what should I eat
-        - best food for me
+---
 
-      THEN:
-      ALWAYS use the
-      user_preferences_search_tool
+MENU SEARCH RULE
 
-    ------------------------------------------------
+Examples:
 
-    RECOMMENDATION LOGIC:
+* show menu
+* show full menu
+* show biryanis
+* show drinks
+* show desserts
+* what food do you have
+* what is available
 
-    Use customer preferences such as:
+Use:
 
-    - favorite cuisines
-    - diet type
-    - favorite foods
-    - spice level
-    - favorite beverages
-    - budget preference
-    - ordering history
+menu_search_tool ONLY
 
-    to recommend suitable menu items.
+---
 
-    ------------------------------------------------
+PRICE QUERY RULE
 
-    RESPONSE RULES:
+Examples:
 
-    IF USER ASKS:
+* price of chicken biryani
+* cost of coke
+* menu prices
+* how much is veg meals
 
-    - "show full menu"
-      → show ALL retrieved categories
+Use:
 
-    - "recommend food"
-      → use user preferences +
-        menu search results
+menu_search_tool ONLY
 
-    - "suggest dinner"
-      → recommend personalized dinner items
+Return retrieved prices.
 
-    - "show veg food"
-      → recommend vegetarian dishes
+---
 
-    - "show biryanis"
-      → show ALL biryani items
+RECOMMENDATION RULE
 
-    ------------------------------------------------
+Examples:
 
-    RESPONSE FORMAT:
+* recommend food
+* suggest dinner
+* what should I eat
+* best food for me
+* recommend based on my preferences
 
-    Recommendation Example:
+Use:
 
-    Recommended For You:
+1. menu_search_tool
+2. user_preferences_search_tool
 
-    1. Chicken Dum Biryani
-       - Quantity: 850 gm
-       - Price: ₹320
+---
 
-    Reason:
-    Based on your preference for
-    spicy non-veg biryanis.
+FOLLOW-UP RULE
 
-    ------------------------------------------------
+Use chat history to understand:
 
-    IMPORTANT:
+* which one
+* recommend one
+* show more
+* what about drinks
+* any desserts
+* what is its price
 
-    - show MULTIPLE menu items
-    - show COMPLETE category results
-    - provide personalized suggestions
-    - keep formatting clean
-    - keep response readable
-    - NEVER hallucinate recommendations
+---
 
-    ------------------------------------------------
+DIRECT RESPONSE RULE
 
-    RESPONSE STYLE:
+Answer exactly what the user asks.
 
-    - professional
-    - personalized
-    - conversational
-    - restaurant assistant tone
-    - customer-friendly
+Examples:
 
-    ------------------------------------------------
+User:
+Show biryanis
 
-    EXAMPLE USER QUERIES:
+Return:
+Biryani items only.
 
-    "Show full menu"
+---
 
-    "Recommend food for me"
+User:
+Price of Chicken Biryani
 
-    "Suggest dinner"
+Return:
+Chicken Biryani price only.
 
-    "What should I eat?"
+---
 
-    "Show all biryanis"
+User:
+Recommend dinner
 
-    "Recommend based on my preferences"
+Return:
+Personalized recommendations.
 
-    ------------------------------------------------
+---
 
-    FINAL OUTPUT REQUIREMENTS:
+OUTPUT RULES
 
-    - conversational response only
-    - no JSON
-    - no markdown
-    - no technical explanations
-    - no hallucinations
-    - complete menu visibility
-    - personalized recommendations
-    - structured formatting
-    """,
+* conversational response only
+* no JSON
+* no markdown
+* no technical explanations
+* include retrieved prices
+* include retrieved quantities
+* answer user query directly
+* use chat history when relevant
+* use preferences only when recommendation is requested
+* use retrieved data only
+  """,
 
-    expected_output="""
-    A complete and personalized
-    restaurant menu response containing:
+  expected_output="""
+  A clean conversational restaurant response
+  containing only relevant menu information,
+  menu prices, menu categories, or personalized
+  recommendations based on the user's query.
 
-    - menu categories
-    - food item names
-    - prices
-    - quantities
-    - personalized recommendations
-    - beverages
-    - desserts
-    - restaurant specials
-
-    using ONLY retrieved menu data
-    and retrieved customer preferences.
-    """
-)
-
-order_task = Task(
-
-    name="Restaurant Food Order Extraction Task",
-
-    agent=order_agent,
-
-    description="""
-    Analyze the following customer
-    restaurant ordering query and extract:
-
-    - ordered food items
-    - quantities
-    - price for one quantity
-
-    ------------------------------------------------
-
-    CUSTOMER QUERY:
-    {input}
-
-    ------------------------------------------------
-
-    EXTRACTION RULES:
-
-    - identify ALL ordered food items
-    - extract quantities for every item
-    - if quantity missing:
-        quantity = 1
-
-    ------------------------------------------------
-
-    FOOD EXTRACTION EXAMPLES:
-
-    USER:
-    "I want chicken biryani"
-
-    OUTPUT:
-    [
-        {
-            "food_item_name": "Chicken Biryani",
-            "quantity": 1,
-            "price": 289
-        }
-    ]
-
-    ------------------------------------------------
-
-    USER:
-    "Add 2 chicken biryanis and 1 coke"
-
-    OUTPUT:
-    [
-        {
-            "food_item_name": "Chicken Biryani",
-            "quantity": 2,
-            "price": 289
-        },
-        {
-            "food_item_name": "Coke",
-            "quantity": 1,
-            "price": 45
-        }
-    ]
-
-    ------------------------------------------------
-
-    USER:
-    "Give me 3 pizzas"
-
-    OUTPUT:
-    [
-        {
-            "food_item_name": "Pizza",
-            "quantity": 3,
-            "price": 499
-        }
-    ]
-
-    ------------------------------------------------
-
-    IMPORTANT RULES:
-
-    - return ONLY raw JSON
-    - return ONLY JSON array
-    - no markdown
-    - no ```json
-    - no explanations
-    - no comments
-    - no headings
-    - no notes
-    - no extra text
-    - output must start with [
-    - output must end with ]
-
-    ------------------------------------------------
-
-    OUTPUT FORMAT:
-
-    [
-        {
-            "food_item_name": "Chicken Biryani",
-            "quantity": 2,
-            "price": 289
-        }
-    ]
-
-    ------------------------------------------------
-
-    OUTPUT MUST BE DIRECTLY PARSEABLE USING:
-
-    json.loads(response)
-    """,
-
-    expected_output="""
-[
-    {
-        "food_item_name": "Chicken Biryani",
-        "quantity": 2,
-        "price": 289
-    },
-    {
-        "food_item_name": "Coke",
-        "quantity": 1,
-        "price": 45
-    }
-]
+All prices and menu items must come from
+retrieved menu data only.
 """
 )
 
 
 
 # order_task = Task(
-# name="Menu Validation Task",
+# name="Restaurant Order Understanding",
 
 # agent=order_agent,
 
 # description="""
-# Validate the following extracted order items.
 
-# ORDER ITEMS:
+# RESTAURANT ID
 
-# {order_items}
+# {restaurant_id}
 
-# ------------------------------------------------
+# ---
 
-# Validation Rules
+# CHAT HISTORY
 
-# Exact Match:
+# {chat_history}
 
-# - item_confirmed=true
-# - availability_status=available
+# ---
 
-# Similar Match:
+# LAST MENU RESPONSE
 
-# - closest menu item found
-# - item_confirmed=false
-# - availability_status=similar_item_found
+# {last_menu_response}
 
-# Multiple Matches:
+# ---
+
+# USER QUERY
+
+# {input}
+
+# ---
+
+# PROCESS
+
+# 1. Search menu using menu_search_tool.
+
+# 2. Extract all requested items.
+
+# 3. Extract quantities.
+
+# 4. Quantity defaults to 1.
+
+# 5. Normalize item names.
+
+# 6. Merge duplicate items.
+
+# 7. Retrieve actual menu prices.
+
+# 8. Evaluate each item independently.
+
+# ---
+
+# EXACT MATCH
+
+# If the user explicitly requests a menu item
+# and an exact menu match exists:
+
+# item_confirmed = true
 
 # Example:
-# User requested: Dosa
+
+# User:
+# "I want Chicken Dum Biryani"
+
+# Result:
+
+# Chicken Dum Biryani
+# item_confirmed = true
+
+# ---
+
+# CATEGORY MATCH
+
+# Examples:
+
+# * biryani
+# * pizza
+# * dessert
+# * desserts
+# * drink
+# * drinks
+# * starter
+# * starters
+# * combo
+# * meal
+# * meals
+
+# If multiple menu items match:
+
+# requires_clarification = true
+
+# clarification_type =
+# "category_selection"
+
+# Add matching menu items into:
+
+# available_options
+
+# DO NOT automatically select:
+
+# * first result
+# * cheapest result
+# * highest priced result
+# * most popular result
+
+# Example:
+
+# User:
+# "I want 3 biryanis"
 
 # Menu:
-# - Plain Dosa
-# - Masala Dosa
-# - Ghee Karam Dosa
 
-# Output:
+# * Chicken Dum Biryani
+# * Veg Biryani
+# * Mutton Biryani
 
-# - item_confirmed=false
-# - availability_status=multiple_matches_found
-# - return suggested_items
+# Return clarification.
 
-# Not Available:
+# Do NOT return Chicken Dum Biryani.
 
-# - item_confirmed=false
-# - availability_status=not_available
+# ---
 
-# ------------------------------------------------
+# CRITICAL NEVER GUESS RULE
 
-# Required Output
+# Never convert:
 
-# [
-#     {
-#         "food_item_name": "",
-#         "matched_item": null,
-#         "quantity": 1,
-#         "price": null,
-#         "item_confirmed": false,
-#         "availability_status": "",
-#         "suggested_items": []
-#     }
-# ]
+# * biryani
+# * pizza
+# * dessert
+# * drink
+# * starter
+# * combo
+# * meal
 
-# ------------------------------------------------
+# into a specific menu item.
 
-# Rules
+# Only return a specific menu item when:
 
-# - JSON array only
-# - No markdown
-# - No explanations
-# - No comments
-# - No extra text
-# - Output must start with [
-# - Output must end with ]
-# """,
+# 1. User explicitly requested it
 
-# expected_output="""
-# ```
+# OR
 
-# [
+# 2. Only one exact menu item exists.
+
+# ---
+
+# SIMILAR MATCH
+
+# If exact item does not exist
+# but similar menu items exist:
+
+# requires_clarification = true
+
+# clarification_type =
+# "similar_item"
+
+# Return similar options in:
+
+# available_options
+
+# Example:
+
+# User:
+# "chiken biriyani"
+
+# Menu:
+
+# Chicken Biryani
+
+# Return similar_item clarification.
+
+# ---
+
+# ITEM NOT FOUND
+
+# If no exact match exists
+# and no similar item exists:
+
+# Add item into:
+
+# unavailable_items
+
+# Example:
+
 # {
-# "food_item_name": "Chicken Biryani",
-# "matched_item": "Chicken Biryani",
-# "quantity": 2,
-# "price": 289,
-# "item_confirmed": true,
-# "availability_status": "available",
-# "suggested_items": []
+# "food_item_name": "jjjj",
+# "quantity": 5,
+# "reason": "item_not_found"
 # }
-# ]
+
+# ---
+
+# MULTI ITEM VALIDATION
+
+# Evaluate EVERY requested item independently.
+
+# Example:
+
+# User:
+# "I want 3 biryanis and 5 jjjj"
+
+# Evaluation:
+
+# biryanis
+# → category_selection
+
+# jjjj
+# → item_not_found
+
+# Never allow one item's result
+# to affect another item's result.
+
+# ---
+
+# STATUS RULES
+
+# success
+
+# All requested items were found
+# through exact matches.
+
+# ---
+
+# partial_success
+
+# Some items were found and
+# some items were unavailable.
+
+# ---
+
+# clarification_required
+
+# One or more requested items
+# require clarification.
+
+# ---
+
+# item_not_found
+
+# No valid menu items found.
+
+# ---
+
+# FOLLOW-UP REFERENCES
+
+# Use:
+
+# * chat_history
+# * last_menu_response
+
+# to understand:
+
+# * it
+# * that
+# * those
+# * first one
+# * second one
+# * same
+# * same again
+# * spicy one
+# * cheapest one
+
+# Only resolve references when
+# sufficient context exists.
+
+# Otherwise return clarification.
+
+# ---
+
+# IGNORE
+
+# * cancel order
+# * modify order
+# * update order
+# * remove item
+# * increase quantity
+# * decrease quantity
+# * confirm order
+# * checkout
+
+# ---
+
+# OUTPUT VALIDATION CHECK
+
+# Before generating output verify:
+
+# 1. No category was converted into a specific menu item.
+
+# 2. item_confirmed=true only for exact matches.
+
+# 3. Every requested item is accounted for.
+
+# 4. unavailable_items contains only unavailable items.
+
+# 5. clarification_items contains only ambiguous items.
+
+# 6. available_options is populated whenever
+#    clarification is required.
+
+# ---
+
+# OUTPUT RULES
+
+# Return ONLY JSON.
+
+# No markdown.
+
+# No explanations.
+
+# No comments.
+
+# No extra text.
+# """,
+# expected_output="""
+
+# {
+# "status": "partial_success",
+# "items": [
+#     {
+#         "food_item_name": "Chicken Dum Biryani",
+#         "quantity": 4,
+#         "price": 320,
+#         "item_confirmed": true,
+#         "unavailable": false
+#     }
+# ],
+
+# "unavailable_items": [
+#     {
+#         "food_item_name": "jjdjjdjdjdj",
+#         "quantity": 3,
+#         "reason": "item_not_found"
+#     }
+# ],
+
+# "clarification_items": [],
+
+# "requires_clarification": false,
+
+# "clarification_type": null,
+
+# "clarification_question": null,
+
+# "available_options": []
+
+# }
 # """
 # )
+
+
+order_task = Task(
+name="Restaurant Order Understanding",
+agent=order_agent,
+
+description="""
+RESTAURANT ID
+
+{restaurant_id}
+
+---
+
+CHAT HISTORY
+
+{chat_history}
+
+---
+
+LAST MENU RESPONSE
+
+{last_menu_response}
+
+---
+
+USER QUERY
+
+{input}
+
+---
+
+PROCESS
+
+1. Search menu using menu_search_tool.
+
+2. Extract all requested items.
+
+3. Extract quantities.
+
+4. Quantity defaults to 1.
+
+5. Normalize item names.
+
+6. Merge duplicate items.
+
+7. Retrieve actual menu prices.
+
+8. Evaluate each item independently.
+
+---
+
+FRESH REQUEST VS FOLLOW-UP RULE
+
+Determine whether the query is:
+
+A) Fresh Request
+
+OR
+
+B) Follow-Up Reference
+
+---
+
+Fresh Request
+
+If the user explicitly provides:
+
+* a menu item name
+
+OR
+
+* a category name
+
+Examples:
+
+* I want Chicken Dum Biryani
+* I want Mutton Biryani
+* I want 3 biryanis
+* I want pizza
+* I want desserts
+
+Then:
+
+IGNORE chat_history
+
+IGNORE last_menu_response
+
+Perform a fresh menu search.
+
+---
+
+Follow-Up Reference
+
+Only if the user uses:
+
+* it
+* that
+* those
+* same
+* same again
+* first one
+* second one
+* spicy one
+* cheapest one
+* add one more
+* order same
+
+Then:
+
+Resolve using:
+
+* chat_history
+
+OR
+
+* last_menu_response
+
+---
+
+Explicit user input always has
+higher priority than history.
+
+Never use last_menu_response
+to replace or infer a new request.
+
+Example:
+
+Last Menu Response:
+
+Chicken Dum Biryani
+
+User:
+
+I want 12 biryanis
+
+Result:
+
+category_match
+
+requires_clarification = true
+
+DO NOT return Chicken Dum Biryani.
+
+---
+
+EXACT MATCH
+
+If the user explicitly requests
+a menu item and an exact menu match exists:
+
+item_confirmed = true
+
+Example:
+
+User:
+
+I want Chicken Dum Biryani
+
+Result:
+
+Chicken Dum Biryani
+
+item_confirmed = true
+
+---
+
+CATEGORY MATCH
+
+Examples:
+
+* biryani
+* biryanis
+* pizza
+* pizzas
+* dessert
+* desserts
+* drink
+* drinks
+* starter
+* starters
+* combo
+* combos
+* meal
+* meals
+
+If multiple menu items belong
+to the requested category:
+
+requires_clarification = true
+
+clarification_type =
+"category_selection"
+
+Add all matching menu items with prices and quantity into:
+
+available_options
+
+DO NOT automatically choose:
+
+* first result
+* cheapest result
+* highest priced result
+* most popular result
+* previously viewed item
+* item from chat_history
+* item from last_menu_response
+
+Example:
+
+User:
+
+I want 3 biryanis
+
+Menu:
+
+* Chicken Dum Biryani
+* Mutton Biryani
+* Veg Biryani
+
+Return clarification.
+
+DO NOT return Chicken Dum Biryani.
+
+---
+
+CRITICAL NEVER GUESS RULE
+
+Never convert:
+
+* biryani
+* biryanis
+* pizza
+* pizzas
+* dessert
+* desserts
+* drink
+* drinks
+* starter
+* starters
+* combo
+* combos
+* meal
+* meals
+
+into a specific menu item.
+
+Only return a specific menu item when:
+
+1. User explicitly requested it
+
+OR
+
+2. Only one menu item exists in that category
+
+Otherwise clarification is required.
+
+---
+
+SIMILAR MATCH
+
+If exact item does not exist
+but similar menu items exist:
+
+requires_clarification = true
+
+clarification_type =
+"similar_item"
+
+Return similar options in:
+
+available_options
+
+Example:
+
+User:
+
+chiken biriyani
+
+Menu:
+
+{item_name: Chicken Biryani,  quantity: quantity, "price": price}
+
+Return similar_item clarification.
+
+Do not confirm the item.
+
+---
+
+ITEM NOT FOUND
+
+If no exact match exists
+and no similar item exists:
+
+Add item into:
+
+unavailable_items
+
+Example:
+
+{
+"food_item_name": "jjjj",
+"quantity": 5,
+"reason": "item_not_found"
+}
+
+Never convert unknown items
+into available menu items.
+
+---
+
+MULTI ITEM VALIDATION
+
+Evaluate EVERY requested item independently.
+
+Example:
+
+User:
+
+I want 3 biryanis and 5 jjjj
+
+Evaluation:
+
+biryanis
+→ category_match
+
+jjjj
+→ item_not_found
+
+Never allow one item's result
+to affect another item's result.
+
+---
+
+STATUS DETERMINATION
+
+Determine status only after
+all requested items have been evaluated.
+
+---
+
+success
+
+Conditions:
+
+* every requested item is an exact match
+
+AND
+
+* unavailable_items is empty
+
+AND
+
+* requires_clarification = false
+
+Example:
+
+I want 27 Chicken Dum Biryani
+
+Result:
+
+status = "success"
+
+---
+
+partial_success
+
+Conditions:
+
+* at least one exact match exists
+
+AND
+
+* at least one unavailable item exists
+
+AND
+
+* requires_clarification = false
+
+Example:
+
+Chicken Dum Biryani found
+
+hhhh not found
+
+Result:
+
+status = "partial_success"
+
+---
+
+clarification_required
+
+Conditions:
+
+* any item requires clarification
+
+Examples:
+
+* category_match
+* similar_match
+
+This status overrides
+success and partial_success.
+
+---
+
+item_not_found
+
+Conditions:
+
+* no exact matches found
+
+AND
+
+* all requested items unavailable
+
+---
+
+STATUS PRIORITY
+
+1. clarification_required
+
+2. partial_success
+
+3. success
+
+4. item_not_found
+
+---
+
+FOLLOW-UP REFERENCES
+
+Use:
+
+* chat_history
+* last_menu_response
+
+ONLY when the current user query
+contains a follow-up reference.
+
+Examples:
+
+* it
+* that
+* those
+* same
+* same again
+* first one
+* second one
+* spicy one
+* cheapest one
+
+Otherwise ignore history.
+
+---
+
+IGNORE
+
+* cancel order
+* modify order
+* update order
+* remove item
+* increase quantity
+* decrease quantity
+* confirm order
+* checkout
+
+---
+
+OUTPUT VALIDATION CHECK
+
+Before generating output verify:
+
+1. No category was converted into a specific menu item.
+
+2. item_confirmed=true only for exact matches.
+
+3. Every requested item is accounted for.
+
+4. unavailable_items contains only unavailable items.
+
+5. clarification_items contains only ambiguous items.
+
+6. available_options is populated whenever clarification is required.
+
+7. last_menu_response was used only for follow-up references.
+
+8. Explicit user input has higher priority than history.
+
+9. Status follows STATUS PRIORITY rules.
+
+10. Success is returned when every item is an exact match.
+
+11. Category requests never become menu items automatically.
+
+12. Similar items never become confirmed items automatically.
+
+---
+
+OUTPUT RULES
+
+Return ONLY JSON.
+
+No markdown.
+
+No explanations.
+
+No comments.
+
+No extra text.
+
+""",
+
+expected_output="""
+{
+"status": "success",
+"items": [
+{
+"food_item_name": "Chicken Dum Biryani",
+"quantity": 4,
+"price": 320,
+"item_confirmed": true,
+"unavailable": false
+}
+],
+"unavailable_items": [],
+"clarification_items": [],
+"requires_clarification": false,
+"clarification_type": null,
+"clarification_question": null,
+"available_options": [{}]
+}
+"""
+)
+
+
+greeting_task = Task(
+
+    name="Restaurant Greeting Task",
+
+    agent=greeting_agent,
+
+    description="""
+CHAT HISTORY
+
+{chat_history}
+
+------------------------------------------------
+
+USER QUERY
+
+{input}
+
+------------------------------------------------
+
+TASK
+
+Determine whether the user is:
+
+1. Greeting
+
+2. Thanking
+
+3. Casual small talk
+
+Use chat_history to maintain
+natural conversation.
+
+------------------------------------------------
+
+CHAT HISTORY USAGE
+
+If customer already greeted:
+
+Do not repeatedly say:
+
+"Welcome to our restaurant"
+
+Instead use:
+
+"Welcome back"
+
+or
+
+"How may I assist you today?"
+
+------------------------------------------------
+
+THANK YOU RULE
+
+Examples:
+
+- thanks
+- thank you
+- appreciate it
+- thanks a lot
+
+Return a polite acknowledgment.
+
+------------------------------------------------
+
+SMALL TALK RULE
+
+Examples:
+
+- how are you
+- how's it going
+- nice to meet you
+
+Respond briefly and redirect
+towards restaurant assistance.
+
+------------------------------------------------
+
+OUTPUT RULES
+
+Greeting:
+
+{
+    "intent": "greeting",
+    "message": "Hello! Welcome to our restaurant. How may I assist you today?"
+}
+
+Thank You:
+
+{
+    "intent": "greeting",
+    "message": "You're welcome! Let me know if you need anything else."
+}
+
+Small Talk:
+
+{
+    "intent": "greeting",
+    "message": "I'm doing well. How may I help you with your order today?"
+}
+
+Not Greeting:
+
+{
+    "intent": "not_greeting"
+}
+
+Return ONLY JSON.
+""",
+
+    expected_output="""
+{
+    "intent": "greeting",
+    "message": "Hello! Welcome to our restaurant. How may I assist you today?"
+}
+"""
+)

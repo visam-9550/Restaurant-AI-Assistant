@@ -241,29 +241,43 @@ def sample_execute_flow(query: str):
 
 
 def restaurant_execute_flow(message: str, user_id:str, session_id: int, restaurant_id: str):
-    flow = RestaurantAssistantFlow()
-    inputs={
-            "query": message,
-            "user_id": user_id,
-            "session_id": session_id,
-            "restaurant_id": restaurant_id
-    }
+    try:
+        flow = RestaurantAssistantFlow()
+        inputs={
+                "query": message,
+                "user_id": user_id,
+                "session_id": session_id,
+                "restaurant_id": restaurant_id
+        }
 
-    response = flow.kickoff(inputs=inputs)
-    intent = getattr(flow.state, 'intent_name', None)
-    message = getattr(flow.state, 'response', None)
-    print(f"Intent: {intent}, Message: {message}")
-    if hasattr(message, "raw"):
-        message = message.raw
-    if not isinstance(message, (str, dict, list, int, float, bool, type(None))):
-        try:
-            message = jsonable_encoder(message)
-        except Exception:
-            message = str(message)
-    return {
-        "intent": intent,
-        "message": message
-    }
+        response = flow.kickoff(inputs=inputs)
+        print(f"Flow response: {response}")
+        intent = getattr(flow.state, 'intent_name', None)
+        message = getattr(flow.state, 'response', None)
+        print(f"Intent: {intent}, Message: {message}")
+        if hasattr(message, "raw"):
+            message = message.raw
+        if not isinstance(message, (str, dict, list, int, float, bool, type(None))):
+            try:
+                message = jsonable_encoder(message)
+            except Exception:
+                message = str(message)
+        return {
+
+            "intent": intent,
+            "message": message
+        }
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print("FLOW ERROR:", str(e))
+        print("TRACEBACK:\n", error_details)
+        return {
+            "intent": None,
+            "message": f"Error processing flow: {str(e)}",
+            "error": str(e),
+            "traceback": error_details
+        }
 
 
 @router.post("/user/message")
@@ -281,20 +295,15 @@ async def handle_user_message(request: UserMessage):
             request.restaurant_id
         )
 
-        print("Flow response:", response)
-
-        # Ensure intent_name and response are serializable
-        print(f"Intent: {response['intent']}, Message: {response['message']}")
-
-        # # Defensive: convert to string if not serializable
-        # if not isinstance(response["intent"], (str, type(None))):
-        #     response["intent"] = str(response["intent"])
-        # if not isinstance(response['message'], (str, type(None))):
-        #     response["message"] = str(response['message'])
-
         return {
-            "intent": response["intent"],
-            "message": response['message']
+            "status_code": 200,
+            "status": "success",
+            "message": "Message processed successfully",
+            "query": request.message,
+            "data": {
+                "intent": response["intent"],
+                "message": response['message']
+            }
         }
     except Exception as e:
         import traceback
@@ -302,8 +311,13 @@ async def handle_user_message(request: UserMessage):
         print("FLOW ERROR:", str(e))
         print("TRACEBACK:\n", error_details)
         return {
-            "error": str(e),
-            "traceback": error_details
+            "status_code": 500,
+            "status": "error",
+            "message": str(e),
+            "data": {
+                "error": str(e),
+                "traceback": error_details
+            }
         }
 
 class dietType(str, Enum):

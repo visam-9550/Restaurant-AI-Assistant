@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+python-dotenv
+crewai
+qdrant-client
+sentence-transformers
+PyMuPDF
+langchain-text-splitters
+langchain-huggingface
+redis
+pymongo
+python-multipart
+openai
+pydantic

@@ -6,6 +6,8 @@ class QdrantService:
         self.client = qdrant_client or get_qdrant_client()
 
     def get_stored_data(self, collection_name):
+        if not self.collection_exists(collection_name):
+            return []
         records, next_page =  self.client.scroll(
             collection_name=collection_name,
             limit=20

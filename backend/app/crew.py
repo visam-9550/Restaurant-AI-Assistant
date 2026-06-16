@@ -1,5 +1,5 @@
-from app.agents import intent_agent, faq_agent, menu_agent, menu_parser_agent, order_agent
-from app.tasks import intent_task, faq_task, menu_task, menu_parser_task, order_task
+from app.agents import intent_agent, faq_agent, menu_agent, menu_parser_agent, order_agent, greeting_agent
+from app.tasks import intent_task, faq_task, menu_task, menu_parser_task, order_task, greeting_task
 from crewai import Crew
 
 
@@ -21,6 +21,13 @@ faq_crew = Crew(
     name="FAQ Crew",
     agents=[faq_agent],
     tasks=[faq_task],
+    cache=False
+)
+
+greeting_crew = Crew(
+    name="Greeting Crew",
+    agents=[greeting_agent],
+    tasks=[greeting_task],
     cache=False
 )
 
