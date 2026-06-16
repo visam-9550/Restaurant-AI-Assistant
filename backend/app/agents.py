@@ -4,6 +4,7 @@ import os
 from app.tools.faq import faq_search_tool
 from app.tools.menu import menu_search_tool, user_preferences_search_tool
 
+load_dotenv()
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 llm = LLM(
