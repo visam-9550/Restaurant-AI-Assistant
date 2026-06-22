@@ -39,6 +39,7 @@ class QdrantService:
 
     def search(self, collection_name, query_vector, top_k=50, score_threshold=0.4):
         filter_conditions = None
+        print("kkkkkkkkkkkkkkkkkkkkk/.....................")
         if collection_name != "intent_classification":
             filter_conditions = [
                     FieldCondition(

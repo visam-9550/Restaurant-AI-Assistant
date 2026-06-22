@@ -338,7 +338,7 @@ class Preferences(BaseModel):
     preferred_meal_type: Optional[str] = Field(description="Preferred meal type", max_length=20, min_length=3)
     preferred_beverages: Optional[list] = Field(description="List of preferred beverages")
     favorite_restaurant_categories: Optional[list] = Field(description="List of favorite restaurant categories")
-    budget_preference: dict = Field(description="Budget preference")
+    budget_preference: Optional[dict] = Field(description="Budget preference")
 class UserPreferences(BaseModel):
     name: str = Field(description="Name of the user", max_length=18, min_length=3)
     email: Optional[EmailStr] = None
@@ -351,7 +351,7 @@ async def handle_user_preferences(request: UserPreferences):
     print(f"Received user preferences from user {request.name}: {request.preferences}")
     # Here you would process the user preferences and update the user's profile in your database
     print(f"Storing user preferences in database for user {request.preferences}")
-    user = await users_collection.insert_one({
+    user = users_collection.insert_one({
         "name": request.name or "Unknown",
         "email": request.email,
         "age": request.age,

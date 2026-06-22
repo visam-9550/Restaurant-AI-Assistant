@@ -35,6 +35,7 @@ def menu_search_tool(query: str) -> str:
     """
     print(f"Received menu search query: {query}")
     search_vector = embedding_service.get_embedding(query)
+    print(f"Search vector: {search_vector}")
     search_results = qdrant_service.search(
         collection_name="menu_collection",
         query_vector=search_vector,

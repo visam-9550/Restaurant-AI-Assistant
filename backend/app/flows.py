@@ -541,6 +541,7 @@ class RestaurantAssistantFlow(Flow[RestaurantAssistantFlowModel]):
         DBService.update_chat_history(self.state.session_id, self.state.user_id, {"role": "assistant", "content": menu_result_text})
         self.state.response = menu_result_text
         self.state.last_menu_response = menu_result_text
+        print(f"Menu crew response: {self.state.response}")
         return f"Menu intent '{menu_result_text}' has been processed."
     
     @listen("order_crew")
