@@ -24,7 +24,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://restaurant-ai-assisstant.onrender.com"
+        "https://restaurant-ai-assisstant.onrender.com",
+        "https://restaurant-ai-assisstant.onrenders.com"
     ],
     allow_credentials=True,
     allow_methods=["*"],
